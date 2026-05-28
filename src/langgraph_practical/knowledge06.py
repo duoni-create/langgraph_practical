@@ -93,6 +93,63 @@ TOPIC_LIBRARY: dict[str, dict[str, object]] = {
         "summary": "一句话总结：LangChain 偏组件工具箱，LangGraph 偏多步骤流程编排。",
         "pitfalls": "两者不是替代关系，常见用法是 LangChain 提供组件，LangGraph 负责编排。",
     },
+    "tool_calling": {
+        "title": "Tool Calling",
+        "keywords": ["tool", "tools", "工具", "工具调用", "调用工具", "调用", "函数调用", "function calling"],
+        "concept": (
+            "Tool Calling 是让模型在需要时调用外部能力，例如查数据库、算价格、"
+            "调用搜索接口，而不是只靠模型自己编答案。"
+        ),
+        "analogy": (
+            "它像学生考试时可以举手请实验室测一次数据。模型负责判断什么时候需要工具，"
+            "工具负责给出真实结果。"
+        ),
+        "compare": (
+            "普通模型回答主要靠已有知识；带工具调用的 Agent 可以把问题交给确定性的函数"
+            "或外部系统处理。"
+        ),
+        "practice": "写一个 `lookup_course(topic)` 工具，让助教按主题查询课程资料。",
+        "project": "课程助教 Agent 可以把资料检索、作业查询、课程进度查询都封装成工具。",
+        "summary": "一句话总结：Tool Calling 是让 Agent 从“会说”升级到“会办事”。",
+        "pitfalls": "不要把所有逻辑都交给模型决定；工具入参、返回值和错误处理要设计清楚。",
+    },
+    "interrupt": {
+        "title": "Interrupt / Human-in-the-loop",
+        "keywords": ["interrupt", "中断", "打断", "人工介入", "人机协作", "审批", "确认"],
+        "concept": (
+            "Interrupt 是在图运行到关键步骤时暂停，把决定权交给人，等人确认或补充信息后再继续。"
+        ),
+        "analogy": (
+            "它像银行转账前的二次确认。系统已经准备好执行，但真正动钱之前会停一下，"
+            "让用户确认金额和收款人。"
+        ),
+        "compare": (
+            "普通自动流程会一路跑到底；有人机协作的流程会在高风险或信息不足的位置暂停。"
+        ),
+        "practice": "设计一个审批节点：当回答会修改学生成绩时，先暂停等待老师确认。",
+        "project": "课程助教 Agent 可以在发布作业、修改成绩、发送通知前加入人工确认。",
+        "summary": "一句话总结：Interrupt 让 LangGraph 流程既能自动执行，也能在关键点请人把关。",
+        "pitfalls": "中断恢复后节点可能重新进入，放在中断前的副作用要谨慎处理。",
+    },
+    "store": {
+        "title": "Store / Long-term Memory",
+        "keywords": ["store", "长期记忆", "长时记忆", "长期", "长时", "跨线程", "用户画像", "偏好"],
+        "concept": (
+            "Store 用来保存跨线程、跨会话都需要记住的信息，例如学生偏好、学习进度、"
+            "常见薄弱点。"
+        ),
+        "analogy": (
+            "它像学校的学生档案。一次对话里的草稿会结束，但学生的基础信息和学习记录"
+            "应该长期保存。"
+        ),
+        "compare": (
+            "Checkpoint 更像某一条对话的运行存档；Store 更像全局资料库，可以被不同线程复用。"
+        ),
+        "practice": "把学生喜欢的讲解风格写入 Store，下次新 thread 也能读出来。",
+        "project": "课程助教 Agent 可以用 Store 保存学生画像，再按画像调整讲解难度。",
+        "summary": "一句话总结：Store 负责长期业务记忆，Checkpoint 负责当前线程的运行状态。",
+        "pitfalls": "不要把所有聊天记录都塞进 Store；长期记忆应该保存稳定、可复用的事实。",
+    },
 }
 
 DEFAULT_TOPIC = "langgraph"
