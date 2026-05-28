@@ -109,6 +109,7 @@ route_by_intent
   +--> retrieve_compare_context
   +--> retrieve_practice_context
   +--> retrieve_project_context
+  +--> retrieve_summary_context
   |
   v
 answer_question
@@ -119,7 +120,7 @@ END
 
 执行时，`analyze_question` 会先从 `messages` 里取出最新的人类问题，然后识别：
 
-- `intent`：问题意图，例如 `concept`、`compare`、`practice`、`project`
+- `intent`：问题意图，例如 `concept`、`compare`、`practice`、`project`、`summary`
 - `topic`：问题主题，例如 `langgraph`、`state`、`checkpoint`
 
 之后条件边根据 `intent` 进入不同资料补充节点，最后统一交给 `answer_question` 生成答案。

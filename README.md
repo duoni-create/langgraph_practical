@@ -9,6 +9,8 @@
 - `Edge`：根据意图走不同分支
 - `Persistence`：通过 `thread_id` 记住同一条对话
 
+当前课程助教 Agent 支持 5 种问题意图：`concept`、`compare`、`practice`、`project`、`summary`。
+
 ## 目录结构
 
 ```text

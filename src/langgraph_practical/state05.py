@@ -11,7 +11,7 @@ class TutorState(TypedDict, total=False):
 
     # 对话消息列表，会随着多轮提问持续累加。
     messages: Annotated[list[AnyMessage], operator.add]
-    # 当前问题识别出的意图，例如 concept / compare / practice / project。
+    # 当前问题识别出的意图，例如 concept / compare / practice / project / summary。
     intent: str
     # 当前问题匹配到的主题，例如 langgraph / state / checkpoint。
     topic: str
@@ -23,7 +23,6 @@ class TutorState(TypedDict, total=False):
     llm_calls: int
     # 图执行轨迹，会把每一步的重要动作追加进去。
     steps: Annotated[list[str], operator.add]
-
 
 
 

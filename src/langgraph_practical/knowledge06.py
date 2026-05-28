@@ -22,6 +22,7 @@ TOPIC_LIBRARY: dict[str, dict[str, object]] = {
         ),
         "practice": "给一个用户问题，设计 3 个节点：分类、检索、生成答案。",
         "project": "做一个课程助教 Agent：先判断问题类型，再补充资料，最后生成老师式回答。",
+        "summary": "一句话总结：LangGraph 的重点是把 Agent 流程拆成可控节点，并用 State 串起上下文。",
         "pitfalls": "不要把 LangGraph 理解成只有画图；它真正的价值是状态管理与流程编排。",
     },
     "state": {
@@ -39,6 +40,7 @@ TOPIC_LIBRARY: dict[str, dict[str, object]] = {
         ),
         "practice": "给 State 增加 `question`、`intent`、`answer` 三个字段，观察每一步怎么变化。",
         "project": "让课程助教 Agent 把用户问题、检索资料和最终答案都写入 State。",
+        "summary": "一句话总结：State 是整张图共享的工作区，负责让前后节点看到同一份上下文。",
         "pitfalls": "State 里尽量放原始数据，不要提前拼成一大段提示词。",
     },
     "node_edge": {
@@ -52,6 +54,7 @@ TOPIC_LIBRARY: dict[str, dict[str, object]] = {
         "compare": "普通函数链是写死的直线，图结构可以根据当前状态选择不同路线。",
         "practice": "写一个条件边：如果用户问的是练习题，就走到 `practice` 节点。",
         "project": "课程助教 Agent 用条件边决定走“概念讲解”还是“项目实战”分支。",
+        "summary": "一句话总结：Node 负责做事，Edge 负责决定下一步去哪。",
         "pitfalls": "不要让一个节点既分类、又检索、又生成，职责越杂，越难讲清楚。",
     },
     "checkpoint": {
@@ -67,6 +70,7 @@ TOPIC_LIBRARY: dict[str, dict[str, object]] = {
         "compare": "普通脚本中断后通常重跑；有 Checkpoint 的图可以从中途继续。",
         "practice": "给同一个 `thread_id` 连续提两个问题，观察第二次如何继承上下文。",
         "project": "课程助教 Agent 使用 `thread_id=class-01` 保留同一学生的追问记录。",
+        "summary": "一句话总结：Checkpoint 负责存档，Thread 负责标记这是哪一段对话。",
         "pitfalls": "没有 `thread_id`，就谈不上真正的会话记忆与恢复。",
     },
     "langgraph_vs_langchain": {
@@ -86,6 +90,7 @@ TOPIC_LIBRARY: dict[str, dict[str, object]] = {
         ),
         "practice": "把一个“问答 + 检索”的小应用拆成工具层和编排层各自负责什么。",
         "project": "在课程助教 Agent 里，用 LangGraph 管路线，用模型层做答案生成。",
+        "summary": "一句话总结：LangChain 偏组件工具箱，LangGraph 偏多步骤流程编排。",
         "pitfalls": "两者不是替代关系，常见用法是 LangChain 提供组件，LangGraph 负责编排。",
     },
 }
@@ -96,6 +101,8 @@ DEFAULT_TOPIC = "langgraph"
 def detect_intent(question: str) -> str:
     """根据问题内容粗粒度判断意图，决定后续走哪条分支。"""
     lowered = question.lower()
+    if any(word in lowered for word in ["总结", "小结", "归纳", "概括", "回顾", "复盘", "summary"]):
+        return "summary"
     if any(word in lowered for word in ["区别", "对比", "比较", "vs", "和"]):
         if "langgraph" in lowered and "langchain" in lowered:
             return "compare"
@@ -145,6 +152,13 @@ def build_context_blocks(intent: str, topic: str) -> list[str]:
         blocks.append(f"练习建议：{payload['practice']}")
     elif intent == "project":
         blocks.append(f"项目建议：{payload['project']}")
+    elif intent == "summary":
+        blocks.extend(
+            [
+                f"课堂小结：{payload['summary']}",
+                f"复盘线索：先说它解决什么问题，再说它在项目里放在哪一层。",
+            ]
+        )
     else:
         blocks.append(f"补充理解：{payload['compare']}")
 

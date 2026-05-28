@@ -94,6 +94,14 @@ def build_tutor_graph(tutor_model: TutorModel):
             "steps": [f"进入项目实战分支：{topic_title(topic)}"],
         }
 
+    def retrieve_summary_context(state: TutorState) -> dict:
+        """为课堂小结类问题补充提纲式复盘素材。"""
+        topic = state["topic"]
+        return {
+            "context_blocks": build_context_blocks("summary", topic),
+            "steps": [f"进入课堂小结分支：{topic_title(topic)}"],
+        }
+
     def answer_question(state: TutorState) -> dict:
         """调用模型把问题、上下文和历史消息整理成最终答案。"""
         question = _latest_question(state)
@@ -123,6 +131,7 @@ def build_tutor_graph(tutor_model: TutorModel):
         "retrieve_compare_context",
         "retrieve_practice_context",
         "retrieve_project_context",
+        "retrieve_summary_context",
     ]:
         """根据意图把流程分发到不同的资料检索分支。"""
         mapping = {
@@ -130,6 +139,7 @@ def build_tutor_graph(tutor_model: TutorModel):
             "compare": "retrieve_compare_context",
             "practice": "retrieve_practice_context",
             "project": "retrieve_project_context",
+            "summary": "retrieve_summary_context",
         }
         return mapping.get(state["intent"], "retrieve_concept_context")
 
@@ -139,6 +149,7 @@ def build_tutor_graph(tutor_model: TutorModel):
     workflow.add_node("retrieve_compare_context", retrieve_compare_context)
     workflow.add_node("retrieve_practice_context", retrieve_practice_context)
     workflow.add_node("retrieve_project_context", retrieve_project_context)
+    workflow.add_node("retrieve_summary_context", retrieve_summary_context)
     workflow.add_node("answer_question", answer_question)
 
     # 图的主流程：入口先分析问题，中间按意图路由，最后统一生成答案。
@@ -148,6 +159,7 @@ def build_tutor_graph(tutor_model: TutorModel):
     workflow.add_edge("retrieve_compare_context", "answer_question")
     workflow.add_edge("retrieve_practice_context", "answer_question")
     workflow.add_edge("retrieve_project_context", "answer_question")
+    workflow.add_edge("retrieve_summary_context", "answer_question")
     workflow.add_edge("answer_question", END)
 
     # 编译时挂上内存检查点，这样同一 thread_id 下可以保留多轮对话状态。
