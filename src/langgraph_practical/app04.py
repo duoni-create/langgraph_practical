@@ -5,6 +5,7 @@ from typing import Literal
 from langchain_core.messages import AIMessage, HumanMessage
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
+from langgraph.types import Command, interrupt
 
 from langgraph_practical.knowledge06 import (
     build_context_blocks,
@@ -33,6 +34,22 @@ def _history_without_latest_question(state: TutorState) -> list:
         if isinstance(messages[index], HumanMessage):
             return messages[:index]
     return []
+
+
+def _is_review_approved(decision: object) -> bool:
+    """把 CLI/UI 恢复进来的审核值统一转换成布尔结果。"""
+    if isinstance(decision, dict):
+        return _is_review_approved(decision.get("approved"))
+    if isinstance(decision, str):
+        return decision.strip().lower() in {"y", "yes", "true", "approve", "approved", "是", "批准", "通过"}
+    return bool(decision)
+
+
+def _review_reason(decision: object) -> str:
+    """从人工审核恢复值里提取备注，方便写入最终状态。"""
+    if isinstance(decision, dict):
+        return str(decision.get("reason") or "").strip()
+    return ""
 
 
 def create_app(settings: ModelSettings):
@@ -102,6 +119,39 @@ def build_tutor_graph(tutor_model: TutorModel):
             "steps": [f"进入课堂小结分支：{topic_title(topic)}"],
         }
 
+    def human_review(
+        state: TutorState,
+    ) -> Command[Literal["answer_question", "reject_question"]]:
+        """在生成最终答案前暂停，等待人工批准或驳回。"""
+        question = _latest_question(state)
+        decision = interrupt(
+            {
+                "question": "是否批准课程助教继续生成答案？",
+                "student_question": question,
+                "intent": state["intent"],
+                "topic": state["topic"],
+                "topic_title": topic_title(state["topic"]),
+                "context_blocks": state.get("context_blocks", []),
+                "options": ["approve", "reject"],
+            }
+        )
+
+        approved = _is_review_approved(decision)
+        reason = _review_reason(decision)
+        review_status = "approved" if approved else "rejected"
+        next_node = "answer_question" if approved else "reject_question"
+        step = f"人工审核：{'批准' if approved else '驳回'}"
+        if reason:
+            step = f"{step}，原因：{reason}"
+        return Command(       # 🌟🌟🌟🌟🌟🌟🌟🌟🌟 这里的 Command 是为了“指定下一个节点要去哪里”，这样在当前节点就能决定，不用再设置 edge 边。
+            goto=next_node,
+            update={
+                "review_status": review_status,
+                "review_reason": reason,
+                "steps": [step],
+            },
+        )
+
     def answer_question(state: TutorState) -> dict:
         """调用模型把问题、上下文和历史消息整理成最终答案。"""
         question = _latest_question(state)
@@ -122,6 +172,16 @@ def build_tutor_graph(tutor_model: TutorModel):
             "answer": answer,
             "llm_calls": llm_calls,
             "steps": [f"调用模型生成答案，第 {llm_calls} 次"],
+        }
+
+    def reject_question(state: TutorState) -> dict:
+        """当人工审核驳回时，直接返回说明，不再调用模型。"""
+        reason = state.get("review_reason") or "人工审核未通过"
+        answer = f"本次回答已被人工审核驳回，原因：{reason}。"
+        return {
+            "messages": [AIMessage(content=answer)],
+            "answer": answer,
+            "steps": ["跳过模型生成，返回人工审核驳回说明"],
         }
 
     def route_by_intent(
@@ -150,17 +210,20 @@ def build_tutor_graph(tutor_model: TutorModel):
     workflow.add_node("retrieve_practice_context", retrieve_practice_context)
     workflow.add_node("retrieve_project_context", retrieve_project_context)
     workflow.add_node("retrieve_summary_context", retrieve_summary_context)
+    workflow.add_node("human_review", human_review)
     workflow.add_node("answer_question", answer_question)
+    workflow.add_node("reject_question", reject_question)
 
     # 图的主流程：入口先分析问题，中间按意图路由，最后统一生成答案。
     workflow.add_edge(START, "analyze_question")
     workflow.add_conditional_edges("analyze_question", route_by_intent)   # 🌟🌟🌟  条件边， route_by_intent 是一个函数处理，决定接下来走哪一个节点
-    workflow.add_edge("retrieve_concept_context", "answer_question")
-    workflow.add_edge("retrieve_compare_context", "answer_question")
-    workflow.add_edge("retrieve_practice_context", "answer_question")
-    workflow.add_edge("retrieve_project_context", "answer_question")
-    workflow.add_edge("retrieve_summary_context", "answer_question")
+    workflow.add_edge("retrieve_concept_context", "human_review")
+    workflow.add_edge("retrieve_compare_context", "human_review")
+    workflow.add_edge("retrieve_practice_context", "human_review")
+    workflow.add_edge("retrieve_project_context", "human_review")
+    workflow.add_edge("retrieve_summary_context", "human_review")
     workflow.add_edge("answer_question", END)
+    workflow.add_edge("reject_question", END)
 
     # 编译时挂上内存检查点，这样同一 thread_id 下可以保留多轮对话状态。
     return workflow.compile(checkpointer=InMemorySaver())

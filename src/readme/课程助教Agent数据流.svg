@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <marker id="arrow-orange" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#c2410c" />
+    </marker>
+    <marker id="arrow-pink" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#be123c" />
+    </marker>
+    <marker id="arrow-gray" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#64748b" />
+    </marker>
+    <style>
+      .title { font: 700 34px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #8a3b12; }
+      .subtitle { font: 18px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #b45309; }
+      .node-title { font: 700 22px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #9a3412; }
+      .node-text { font: 17px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #9a3412; }
+      .small-text { font: 15px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #b45309; }
+      .pink-title { font: 700 22px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #be123c; }
+      .pink-text { font: 17px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #be123c; }
+      .gray-title { font: 700 22px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #475569; }
+      .gray-text { font: 17px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #475569; }
+      .orange-box { fill: #fff7cc; stroke: #f97316; stroke-width: 2.4; }
+      .input-box { fill: #ffedd5; stroke: #f97316; stroke-width: 2.4; }
+      .pink-box { fill: #ffe4ec; stroke: #fb7185; stroke-width: 2.4; }
+      .gray-box { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 2.4; }
+      .output-box { fill: #ffedd5; stroke: #fb923c; stroke-width: 2.4; }
+      .orange-line { fill: none; stroke: #c2410c; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-orange); }
+      .orange-line-no-arrow { fill: none; stroke: #c2410c; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+      .pink-line { fill: none; stroke: #be123c; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-pink); }
+      .gray-line { fill: none; stroke: #64748b; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-gray); }
+      .label { font: 700 15px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #be123c; }
+      .gray-label { font: 700 15px "Microsoft YaHei", "PingFang SC", sans-serif; fill: #64748b; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1280" height="720" fill="#fff7ed" />
+
+  <text x="54" y="54" class="title">实战项目：课程助教 Agent 数据流</text>
+  <text x="54" y="88" class="subtitle">这个项目故意做得“小而完整”：输入问题、识别意图、补资料、人工审核，再决定是否生成答案。</text>
+
+  <rect x="70" y="185" width="205" height="92" rx="22" class="input-box" />
+  <text x="172.5" y="225" text-anchor="middle" class="node-title">输入问题</text>
+  <text x="172.5" y="254" text-anchor="middle" class="node-text">用户提问</text>
+
+  <rect x="330" y="168" width="245" height="126" rx="22" class="input-box" />
+  <text x="452.5" y="210" text-anchor="middle" class="node-title">analyze_question</text>
+  <text x="452.5" y="240" text-anchor="middle" class="node-text">识别意图与主题</text>
+  <text x="452.5" y="269" text-anchor="middle" class="small-text">concept / compare / practice</text>
+  <text x="452.5" y="292" text-anchor="middle" class="small-text">project / summary</text>
+
+  <path d="M275 231 H330" class="orange-line" />
+
+  <rect x="645" y="80" width="235" height="86" rx="22" class="orange-box" />
+  <text x="762.5" y="114" text-anchor="middle" class="node-title">concept 分支</text>
+  <text x="762.5" y="144" text-anchor="middle" class="node-text">补充概念和比喻</text>
+
+  <rect x="645" y="182" width="235" height="86" rx="22" class="orange-box" />
+  <text x="762.5" y="216" text-anchor="middle" class="node-title">compare 分支</text>
+  <text x="762.5" y="246" text-anchor="middle" class="node-text">补充对比材料</text>
+
+  <rect x="645" y="284" width="235" height="86" rx="22" class="orange-box" />
+  <text x="762.5" y="318" text-anchor="middle" class="node-title">practice 分支</text>
+  <text x="762.5" y="348" text-anchor="middle" class="node-text">补充练习建议</text>
+
+  <rect x="645" y="386" width="235" height="86" rx="22" class="orange-box" />
+  <text x="762.5" y="420" text-anchor="middle" class="node-title">project 分支</text>
+  <text x="762.5" y="450" text-anchor="middle" class="node-text">补充实战方案</text>
+
+  <rect x="645" y="488" width="235" height="86" rx="22" class="orange-box" />
+  <text x="762.5" y="522" text-anchor="middle" class="node-title">summary 分支</text>
+  <text x="762.5" y="552" text-anchor="middle" class="node-text">补充课堂小结</text>
+
+  <path d="M575 231 C610 231, 607 123, 645 123" class="orange-line" />
+  <path d="M575 231 C608 231, 612 225, 645 225" class="orange-line" />
+  <path d="M575 231 C608 231, 612 327, 645 327" class="orange-line" />
+  <path d="M575 231 C606 231, 607 429, 645 429" class="orange-line" />
+  <path d="M575 231 C604 231, 600 531, 645 531" class="orange-line" />
+
+  <rect x="1000" y="215" width="220" height="126" rx="22" class="pink-box" />
+  <text x="1110" y="252" text-anchor="middle" class="pink-title">human_review</text>
+  <text x="1110" y="282" text-anchor="middle" class="pink-text">调用 interrupt()</text>
+  <text x="1110" y="309" text-anchor="middle" class="pink-text">等待批准 / 驳回</text>
+
+  <path d="M880 123 C945 123, 934 246, 1000 246" class="pink-line" />
+  <path d="M880 225 C940 225, 944 260, 1000 260" class="pink-line" />
+  <path d="M880 327 C940 327, 944 278, 1000 278" class="pink-line" />
+  <path d="M880 429 C943 429, 934 296, 1000 296" class="pink-line" />
+  <path d="M880 531 C950 531, 930 315, 1000 315" class="pink-line" />
+
+  <rect x="685" y="615" width="235" height="82" rx="22" class="pink-box" />
+  <text x="802.5" y="648" text-anchor="middle" class="pink-title">answer_question</text>
+  <text x="802.5" y="677" text-anchor="middle" class="pink-text">批准后调用模型</text>
+
+  <rect x="1000" y="615" width="220" height="82" rx="22" class="gray-box" />
+  <text x="1110" y="648" text-anchor="middle" class="gray-title">reject_question</text>
+  <text x="1110" y="677" text-anchor="middle" class="gray-text">驳回后跳过模型</text>
+
+  <path d="M1078 341 C1055 450, 935 560, 846 615" class="pink-line" />
+  <text x="932" y="522" class="label">approve</text>
+  <path d="M1142 341 C1160 450, 1162 546, 1135 615" class="gray-line" />
+  <text x="1164" y="522" class="gray-label">reject</text>
+
+  <rect x="382" y="615" width="220" height="82" rx="22" class="output-box" />
+  <text x="492" y="648" text-anchor="middle" class="node-title">结果输出</text>
+  <text x="492" y="677" text-anchor="middle" class="node-text">答案 + 审核状态 + trace</text>
+
+  <path d="M685 656 H602" class="pink-line" />
+  <path d="M1000 656 C880 704, 685 704, 602 670" class="gray-line" />
+
+  <text x="54" y="682" class="small-text">对应现有项目：route_by_intent → 五类 retrieve_*_context → human_review → answer_question / reject_question</text>
+</svg>

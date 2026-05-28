@@ -19,10 +19,13 @@ class TutorState(TypedDict, total=False):
     context_blocks: list[str]
     # 最终返回给学生的口语化答案。
     answer: str
+    # 人工审核结果：pending / approved / rejected。
+    review_status: str
+    # 人工审核时填写的原因或备注。
+    review_reason: str
     # 当前线程里累计调用模型的次数，便于课堂观察执行过程。
     llm_calls: int
     # 图执行轨迹，会把每一步的重要动作追加进去。
     steps: Annotated[list[str], operator.add]
-
 
 

@@ -2,12 +2,13 @@
 
 一个适合课堂演示的 LangGraph 小项目：`课程助教 Agent`。
 
-它演示了 4 个最重要的入门概念：
+它演示了 5 个最重要的入门概念：
 
 - `State`：状态在节点之间流动
 - `Node`：每个节点只做一件事
 - `Edge`：根据意图走不同分支
 - `Persistence`：通过 `thread_id` 记住同一条对话
+- `Human-in-the-loop`：通过 `interrupt()` 暂停，等待人工批准或驳回
 
 当前课程助教 Agent 支持 5 种问题意图：`concept`、`compare`、`practice`、`project`、`summary`。
 
@@ -44,6 +45,13 @@ python3 -m venv .venv
 PYTHONPATH=src .venv/bin/python -m langgraph_practical demo --mock
 ```
 
+如果想在脚本里自动通过人工审核，可以加：
+
+```bash
+PYTHONPATH=src .venv/bin/python -m langgraph_practical demo --mock \
+  --review-decision approve
+```
+
 ### 2. 真实调用 DeepSeek
 
 ```bash
@@ -72,5 +80,6 @@ PYTHONPATH=src .venv/bin/python -m langgraph_practical run \
 - 默认模型是 `deepseek-v4-flash`
 - 默认会优先从 `.env` 读取 `DEEPSEEK_MODEL` 和 `DEEPSEEK_BASE_URL`
 - 使用 `thread_id` 保持同一会话记忆
+- 生成答案前会进入人工审核节点，CLI 使用 `Command(resume=...)` 恢复执行
 - 提供 `--mock` 模式，课堂没网也能完整演示图执行流程
 - 没有把密钥写进代码，运行时通过 `.env`、环境变量或参数传入

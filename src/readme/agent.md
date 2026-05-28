@@ -112,18 +112,20 @@ route_by_intent
   +--> retrieve_summary_context
   |
   v
-answer_question
+human_review
   |
-  v
-END
+  +--> approve --> answer_question --> END
+  +--> reject  --> reject_question --> END
 ```
+
+其中 `human_review` 会调用 `interrupt()` 暂停图执行，把问题、意图、主题和上下文素材暴露给 CLI 或 UI。人工输入批准 / 驳回后，CLI 用 `Command(resume=...)` 恢复同一个 `thread_id` 下的执行。
 
 执行时，`analyze_question` 会先从 `messages` 里取出最新的人类问题，然后识别：
 
 - `intent`：问题意图，例如 `concept`、`compare`、`practice`、`project`、`summary`
 - `topic`：问题主题，例如 `langgraph`、`state`、`checkpoint`
 
-之后条件边根据 `intent` 进入不同资料补充节点，最后统一交给 `answer_question` 生成答案。
+之后条件边根据 `intent` 进入不同资料补充节点，再进入人工审核；批准后交给 `answer_question` 生成答案，驳回后由 `reject_question` 直接返回说明。
 
 ## 7. 状态约定
 
@@ -136,6 +138,8 @@ class TutorState(TypedDict, total=False):
     topic: str
     context_blocks: list[str]
     answer: str
+    review_status: str
+    review_reason: str
     llm_calls: int
     steps: Annotated[list[str], operator.add]
 ```
@@ -146,6 +150,7 @@ class TutorState(TypedDict, total=False):
 - `steps` 会追加保存执行轨迹，方便课堂观察图的运行过程。
 - `intent` 和 `topic` 是路由依据，不要在后续节点随意改写。
 - `context_blocks` 是给模型使用的素材块，不建议提前拼成复杂 prompt。
+- `review_status` / `review_reason` 保存人工审核结果，批准才会继续调用模型。
 - `llm_calls` 用于观察调用次数，不承担业务逻辑。
 
 ## 8. 后续开发约定
@@ -158,7 +163,7 @@ class TutorState(TypedDict, total=False):
 4. 修改命令参数：集中改 `cli.py`，不要把命令行解析逻辑放进图节点。
 5. 修改状态字段：先改 `state.py`，再逐个检查读写该字段的节点。
 
-节点设计尽量保持单一职责：分析、检索、生成分开写，便于调试和课堂讲解。
+节点设计尽量保持单一职责：分析、检索、审核、生成分开写，便于调试和课堂讲解。
 
 ## 9. 验证清单
 
@@ -168,10 +173,18 @@ class TutorState(TypedDict, total=False):
 .\.venv\Scripts\python.exe -m langgraph_practical demo --mock
 ```
 
+无人值守脚本可以显式传入审核结果：
+
+```powershell
+.\.venv\Scripts\python.exe -m langgraph_practical demo --mock --review-decision approve
+.\.venv\Scripts\python.exe -m langgraph_practical run --mock --question "解释 State" --review-decision reject --review-reason "课堂暂不回答"
+```
+
 重点确认：
 
 - 第一轮和第二轮都能正常输出。
 - `trace` 中能看到正确的意图、主题和分支。
+- `trace` 中能看到人工审核批准或驳回。
 - 第二轮仍然使用同一个 `thread_id`。
 - `--mock` 模式不依赖网络和 API Key。
 
